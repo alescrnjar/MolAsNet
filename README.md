@@ -21,9 +21,12 @@
 
 MolAsNet is a Graph Convolutional Neural (GCN) Network, that takes the structure of a given protein as a graph and predicts whether atoms are hydrogens or heavy atoms (C, N, O, S), thus performing a node classification task. The protein structure is loaded as a .mol2 file, which provides information on the atoms identity as well as the bond network.
 
-The code is adapted from this tutorial: https://towardsdatascience.com/a-beginners-guide-to-graph-neural-networks-using-pytorch-geometric-part-1-d98dc93e7742
+Node features include atomic species (C, N, O, S, H), residue name, whether the atom is a hydrogen or a heavy atom, and whether the atom belongs to the protein backbone or to a side-chain.
 
 The chosen default embeddings/numerical representations for the nodes is node degree.
+
+The code is adapted from this tutorial: https://towardsdatascience.com/a-beginners-guide-to-graph-neural-networks-using-pytorch-geometric-part-1-d98dc93e7742
+
 
 <!--The architecture includes 4 GCNConv layers (first described by Kipf et al.: https://arxiv.org/abs/1609.02907).
 
@@ -64,7 +67,7 @@ Train Accuracy: 0.947305745757666 Test Accuray: 0.9428571428571428
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
 </p>
 <p align="center">
-<em> Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation </em>
+<em> Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation. </em>
 </p>
 
 <!--
