@@ -114,5 +114,5 @@ def testing_stage(model, data,
                             species, is_H, resnames, in_backbone, 
                             pdbid, 
                             output_directory, 
-                            what_sel='species')
+                            what_sel=what_sel)
     return acc1,acc
