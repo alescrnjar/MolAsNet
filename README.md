@@ -58,7 +58,15 @@ Throught the usage of the library MDAnalysis, an output .pdb is produced, whose 
 
 <p align="center">
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
+* Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation *
 </p>
+
+In 
+
+
+With 8000 training epochs: 
+
+Train Accuracy: 0.947305745757666 Test Accuray: 0.9428571428571428
 
 
 <!--
