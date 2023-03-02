@@ -60,6 +60,8 @@ With 8000 training epochs: Train Accuracy: 0.947305745757666 Test Accuray: 0.942
 
 <p align="center">
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
+</p>
+<p align="center">
 <em> Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation </em>
 </p>
 
