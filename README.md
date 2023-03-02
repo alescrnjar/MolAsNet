@@ -1,4 +1,4 @@
-# Mol2Nex
+# MolAsNet
 
 <!--AtomGuesser ProteinNode ProteinGraph NodeInProtein ProNode CONSHGuess OrganicGuesser TopGraph Mol2Grapher Link Tree GraTein PepGraph(esiste) Mol2NX Mol2Net(Esistente) Mol2Nex(libero) Pro2Net(esistente) MolAsNet(libero)
 -->
@@ -46,11 +46,14 @@ Throught the usage of the library MDAnalysis, an output .pdb is produced, whose 
 <!--* sklearn: NON TROVATO CON PIP SHOW!
 * tqdm >= 4.64.0 -->
 
-<!--
-# Example Confusion Matrix
+# Case Study: 6EQE
 
 <p align="center">
-<img width="500" src=https://github.com/alescrnjar/AminoX/blob/main/example_output/Prediction_Matrix.png>
+<img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
 </p>
+
+
+<!--
+# Example Confusion Matrix
 -->
 
