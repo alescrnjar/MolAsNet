@@ -33,81 +33,82 @@ parser.add_argument('--random_seed', default=42, type=int)
 parser.add_argument('--log_freq', default=100, type=int) # Frequency for output
 parser.add_argument('--output_directory', default='./example_output/', type=str) 
 
-#if __name__ == "__main__":   
-
-args = parser.parse_args()
-print(f"{args=}")
-
-# Graph definition
-if args.what_graph=='MolAsNet':
-    G=protein_graph(args.input_directory+args.pdbid+'_protein.mol2')
-
-    species = []
-    is_H = []
-    resnames = []
-    in_backbone = []
-    for i,node in enumerate(G.nodes):
-        is_H.append(G.nodes[node]['is_H'])
-        species.append(G.nodes[node]['species'])
-        resnames.append(G.nodes[node]['resname'])
-        in_backbone.append(G.nodes[node]['in_backbone'])
+if __name__ == "__main__":   
     
-    if args.classification=='is_H': labels = labeling(is_H)
-    if args.classification=='species': labels = labeling(species)
-    if args.classification=='in_backbone': labels = labeling(in_backbone)
-    labels=np.asarray(labels).astype(np.int64)
+    args = parser.parse_args()
+    print(f"{args=}")
+
+    # Graph definition
+    if args.what_graph=='MolAsNet':
+        G=protein_graph(args.input_directory+args.pdbid+'_protein.mol2')
+
+        species = []
+        is_H = []
+        resnames = []
+        in_backbone = []
+        for i,node in enumerate(G.nodes):
+            is_H.append(G.nodes[node]['is_H'])
+            species.append(G.nodes[node]['species'])
+            resnames.append(G.nodes[node]['resname'])
+            in_backbone.append(G.nodes[node]['in_backbone'])
+        
+        if args.classification=='is_H': labels = labeling(is_H)
+        if args.classification=='species': labels = labeling(species)
+        if args.classification=='in_backbone': labels = labeling(in_backbone)
+        labels=np.asarray(labels).astype(np.int64)
+        
+        # Make COO-format edges
+        adj = nx.to_scipy_sparse_matrix(G).tocoo() 
+        row = torch.from_numpy(adj.row.astype(np.int64)).to(torch.long)
+        col = torch.from_numpy(adj.col.astype(np.int64)).to(torch.long)
+        edge_index = torch.stack([row, col], dim=0)
+
+        # Select features for embeddings.
+        if args.feats=='degree':
+            embeddings = np.array(list(dict(G.degree()).values()))
+        # Standardize features by removing the mean and scaling to unit variance. 
+        scale = StandardScaler() 
+        embeddings = scale.fit_transform(embeddings.reshape(-1,1))
     
-    # Make COO-format edges
-    adj = nx.to_scipy_sparse_matrix(G).tocoo() 
-    row = torch.from_numpy(adj.row.astype(np.int64)).to(torch.long)
-    col = torch.from_numpy(adj.col.astype(np.int64)).to(torch.long)
-    edge_index = torch.stack([row, col], dim=0)
+    # Data definition
+    if args.what_graph=='MolAsNet':
+        dataset = MolDataset(G, edge_index, embeddings, labels, args.test_size, args.random_seed)
+    data = dataset[0]
+    data_statistics(data, species, is_H, resnames, in_backbone, what_mask='train_mask')
+    data_statistics(data, species, is_H, resnames, in_backbone, what_mask='test_mask')
 
-    # Select features for embeddings.
-    if args.feats=='degree':
-        embeddings = np.array(list(dict(G.degree()).values()))
-    # Standardize features by removing the mean and scaling to unit variance. 
-    scale = StandardScaler() 
-    embeddings = scale.fit_transform(embeddings.reshape(-1,1))
-    
-if args.what_graph=='MolAsNet':
-    dataset = MolDataset(G, edge_index, embeddings, labels, args.test_size, args.random_seed)
-data = dataset[0]
-data_statistics(data, species, is_H, resnames, in_backbone, what_mask='train_mask')
-data_statistics(data, species, is_H, resnames, in_backbone, what_mask='test_mask')
+    # Device setting
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device='cpu'
+    print(f"{device=}")
+    data =  data.to(device)
 
-# Device setting
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device='cpu'
-print(f"{device=}")
-data =  data.to(device)
+    # Model definition
+    model = GCN_Net(data, args.n_hidden).to(device)
+    print("AC: model defined")
 
-# Model definition
-model = GCN_Net(data, args.n_hidden).to(device)
-print("AC: model defined")
+    # Training stage
+    torch.manual_seed(args.random_seed)
 
-# Training stage
+    optimizer_name = "Adam"
+    optimizer = getattr(torch.optim, optimizer_name)(model.parameters(), lr=args.learning_rate)
 
-torch.manual_seed(args.random_seed)
+    print("Training start.") 
+    summary_writer = SummaryWriter(args.output_directory) # Usage: tensorboard --logdir=./
+    for epoch in range(args.n_epochs):
+        loss=train(model, data, optimizer)
+        if epoch%args.log_freq==0: print(f"{epoch=} {loss=}")
+        summary_writer.add_scalar('Loss',torch.FloatTensor([loss]),global_step=epoch)
 
-optimizer_name = "Adam"
-optimizer = getattr(torch.optim, optimizer_name)(model.parameters(), lr=args.learning_rate)
+    # Testing stage
+    print("Test start.")
+    train_acc,test_acc = testing_stage(model, data, 
+                                    labels, 
+                                    species, is_H, resnames, in_backbone, 
+                                    args.classification, args.pdbid, args.output_directory, 
+                                    inpname=args.input_directory+args.pdbid+'_protein.mol2')
 
-print("Training start.") 
-summary_writer = SummaryWriter(args.output_directory) # Usage: tensorboard --logdir=./
-for epoch in range(args.n_epochs):
-    loss=train(model, data, optimizer)
-    if epoch%args.log_freq==0: print(f"{epoch=} {loss=}")
-    summary_writer.add_scalar('Loss',torch.FloatTensor([loss]),global_step=epoch)
-
-print("Test start.")
-train_acc,test_acc = testing_stage(model, data, 
-                                   labels, 
-                                   species, is_H, resnames, in_backbone, 
-                                   args.classification, args.pdbid, args.output_directory, 
-                                   inpname=args.input_directory+args.pdbid+'_protein.mol2')
-
-print('=' * 50)
-print('Train Accuracy: {} Test Accuray: {}'.format(train_acc,test_acc))
-print('=' * 50)
+    print('=' * 50)
+    print('Train Accuracy: {} Test Accuray: {}'.format(train_acc,test_acc))
+    print('=' * 50)
 
