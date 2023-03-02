@@ -11,15 +11,15 @@
 - propagazione degli errori e piu corretta, per l'accuracy per resn!
 -->
 
-Mol2Nex is a Graph Convolutional Neural (GCN) Network, that takes the structure of a given protein as a graph and predicts whether atoms are hydrogens or heavy atoms (C, N, O, S): thus performing a node classification task. The protein structure is loaded as a .mol2 file, which provides information on the atoms identity as well as the bond network.
+MolAsNet is a Graph Convolutional Neural (GCN) Network, that takes the structure of a given protein as a graph and predicts whether atoms are hydrogens or heavy atoms (C, N, O, S): thus performing a node classification task. The protein structure is loaded as a .mol2 file, which provides information on the atoms identity as well as the bond network.
 
 The code is adapted from this tutorial: https://towardsdatascience.com/a-beginners-guide-to-graph-neural-networks-using-pytorch-geometric-part-1-d98dc93e7742
 
 The chosen default embeddings/numerical representations for the nodes is node degree.
 
-The architecture includes 4 GCNConv layers (first described by Kipf et al.: https://arxiv.org/abs/1609.02907).
+<!--The architecture includes 4 GCNConv layers (first described by Kipf et al.: https://arxiv.org/abs/1609.02907).
 
-The used loss function is Cross Entropy.
+The used loss function is Cross Entropy.-->
 
 The provided example .mol2 file regards the crystal structure of a polyethylene terephthalate degrading hydrolase (PDB ID: 6EQE, https://www.rcsb.org/structure/6eqe). The .pdb file was downloaded already included hydrogens, and the software VMD was used to make a .mol2 file for the selection of protein atoms.
 
