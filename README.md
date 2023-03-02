@@ -56,19 +56,12 @@ Throught the usage of the library MDAnalysis, an output .pdb is produced, whose 
 
 # Case Study: 6EQE
 
+With 8000 training epochs: Train Accuracy: 0.947305745757666 Test Accuray: 0.9428571428571428
+
 <p align="center">
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
-
 <em> Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation </em>
 </p>
-
-In 
-
-
-With 8000 training epochs: 
-
-Train Accuracy: 0.947305745757666 Test Accuray: 0.9428571428571428
-
 
 <!--
 # Example Confusion Matrix
