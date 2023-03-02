@@ -61,7 +61,7 @@ Throught the usage of the library MDAnalysis, an output .pdb is produced, whose 
 
 With 8000 training epochs: 
 
-Train Accuracy: 0.947305745757666 Test Accuray: 0.9428571428571428
+Train Accuracy: 0.947305745757666 Test Accuracy: 0.9428571428571428
 
 <p align="center">
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>

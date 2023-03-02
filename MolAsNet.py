@@ -34,7 +34,7 @@ parser.add_argument('--log_freq', default=100, type=int) # Frequency for output
 parser.add_argument('--output_directory', default='./example_output/', type=str) 
 
 if __name__ == "__main__":   
-    
+
     args = parser.parse_args()
     print(f"{args=}")
 
@@ -109,6 +109,6 @@ if __name__ == "__main__":
                                     inpname=args.input_directory+args.pdbid+'_protein.mol2')
 
     print('=' * 50)
-    print('Train Accuracy: {} Test Accuray: {}'.format(train_acc,test_acc))
+    print('Train Accuracy: {} Test Accuracy: {}'.format(train_acc,test_acc))
     print('=' * 50)
 
