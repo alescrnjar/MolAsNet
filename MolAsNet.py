@@ -16,34 +16,38 @@ from beta_rate import *
 parser = argparse.ArgumentParser()
 # Input parameters
 parser.add_argument('--dset', default='MolAsNet', type=str) 
-parser.add_argument('--input_directory', default='./', type=str)
-parser.add_argument('--pdbid', default='6eqe', type=str)
+parser.add_argument('--input_directory', default='./example_input', type=str)
+parser.add_argument('--pdbid', default='6eqe', type=str) # PDB ID of input protein
 
 # Model parameters
-parser.add_argument('--feats', default='degree', type=str) 
-parser.add_argument('--classification', default='is_H', type=str) 
-parser.add_argument('--n_epochs', default=5000, type=int) #orig: 200
-parser.add_argument('--n_hidden', default=256, type=int) #128 #64 #orig: 16
-parser.add_argument('--learning_rate', default=1e-3, type=float) #1e-2 #orig: 1e-1
-parser.add_argument('--test_size', default=0.20, type=float) #orig: 0.30
-parser.add_argument('--random_seed', default=42, type=int) #orig: 42
+parser.add_argument('--feats', default='degree', type=str) # Features for embeddings.
+parser.add_argument('--classification', default='is_H', type=str) # Which labels set to use for node classification.
+parser.add_argument('--n_epochs', default=5000, type=int) # Number of epochs for training
+parser.add_argument('--n_hidden', default=256, type=int) # Hidden layers dimension
+parser.add_argument('--learning_rate', default=1e-3, type=float) 
+parser.add_argument('--test_size', default=0.20, type=float) # Train/test size ratio
+parser.add_argument('--random_seed', default=42, type=int) 
 
 # Output parameters
-parser.add_argument('--log_freq', default=100, type=int)
-parser.add_argument('--output_directory', default='./', type=str)
+parser.add_argument('--log_freq', default=100, type=int) # Frequency for output
+parser.add_argument('--output_directory', default='./', type=str) 
 
 args = parser.parse_args()
 print(f"{args=}")
 
 def labeling(my_list):
+    """
+    Turn list into new numerical list.
+    """
     new_list=[]
     unique=list(np.unique(my_list))
     for x in my_list:
         new_list.append(unique.index(x))
     return new_list
 
-elif args.dset=='MolAsNet':
+if args.dset=='MolAsNet':
     G=protein_graph(args.pdbid+'_protein.mol2')
+
     species=[]
     is_H=[]
     resnames=[]
@@ -53,14 +57,19 @@ elif args.dset=='MolAsNet':
         species.append(G.nodes[node]['species'])
         resnames.append(G.nodes[node]['resname'])
         in_backbone.append(G.nodes[node]['in_backbone'])
+    
     if args.classification=='is_H': labels=labeling(is_H)
     if args.classification=='species': labels=labeling(species)
     if args.classification=='in_backbone': labels=labeling(in_backbone)
     labels=np.asarray(labels).astype(np.int64)
+    
+    # Make COO-format edges
     adj = nx.to_scipy_sparse_matrix(G).tocoo() 
     row = torch.from_numpy(adj.row.astype(np.int64)).to(torch.long)
     col = torch.from_numpy(adj.col.astype(np.int64)).to(torch.long)
     edge_index = torch.stack([row, col], dim=0)
+
+    # Select features for embeddings.
     if args.feats=='degree':
         embeddings = np.array(list(dict(G.degree()).values()))
     # Standardize features by removing the mean and scaling to unit variance. 
@@ -112,6 +121,9 @@ class MolDataset(InMemoryDataset):
         return '{}()'.format(self.__class__.__name__)
 
 def data_statistics(data,what_mask='test_mask'):
+    """
+    Print out train/test dataset statistics.
+    """
     print("--- Statistics for:",what_mask)
     species_counts={'C':0,'O':0,'N':0,'H':0,'S':0,'heavy':0}
     atoms_per_resname={'ALA':0,'ARG':0,'CYS':0,'GLU':0,'GLN':0,'THR':0,'TYR':0,'VAL':0,'ILE':0,'LEU':0,'PRO':0,'MET':0,'ASN':0,'ASP':0,'LYS':0,'PHE':0,'GLY':0,'SER':0,'TRP':0,'HIS':0}
@@ -202,6 +214,9 @@ def plot_dict(dict0,dict_std,features,max_feat=None,png_name='Rates.png'):
     print()
     
 def results(mask, pred, indeces):
+    """
+    Plot prediction accuracy for all nodes, and write PDB with temperature factor according to prediction success label.
+    """
     print("================ Results ================")
     successes = np.ones(len(mask))
     for i,pr in enumerate(list(pred)):
@@ -216,6 +231,9 @@ def results(mask, pred, indeces):
     print()
 
 def results_per_sel(pred, indeces, what_sel='resnames'):
+    """
+    Print and plot accuracies grouped by selection
+    """
     print("================ Results per",what_sel,"================")
     if what_sel=='species': all_sel=['C','O','N','H','S']
     if what_sel=='resnames': all_sel=['ALA','ARG','CYS','GLU','GLN','THR','TYR','VAL','ILE','LEU','PRO','MET','ASN','ASP','LYS','PHE','GLY','SER','TRP','HIS']
@@ -245,7 +263,7 @@ def results_per_sel(pred, indeces, what_sel='resnames'):
     plot_dict(list(succ_per_sel.values()),list(std_per_sel.values()),features=list(succ_per_sel.keys()),max_feat=None,png_name='Rates_per_'+what_sel+'_'+args.pdbid+'.png')
     
 @torch.no_grad()
-def my_test():
+def testing_stage():
     model.eval()
     logits = model()
     mask = data['test_mask']
@@ -275,7 +293,7 @@ print("Training end.")
 
 print("Test start.")
 train_acc,test_acc = test()
-my_test()
+testing_stage()
 #confusion_matrix()
 print("Test end.")
 
