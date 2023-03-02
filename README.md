@@ -67,7 +67,7 @@ Train Accuracy: 0.947305745757666 Test Accuracy: 0.9428571428571428
 <img width="500" src=https://github.com/alescrnjar/MolAsNet/blob/main/example_output/Screenshot.png>
 </p>
 <p align="center">
-<em> Temperature factors beta for 6EQE predictions, with resids 90-96 in Licorice representation. </em>
+<em> Temperature factors beta for 6EQE predictions (0: red, 1: white, 2: blue), with resids 90-96 in Licorice representation. </em>
 </p>
 
 <!--
